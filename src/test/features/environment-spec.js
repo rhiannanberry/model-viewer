@@ -21,21 +21,17 @@ const expect = chai.expect;
 const BG_IMAGE_URL = './examples/assets/equirectangular.png';
 const MODEL_URL = './examples/assets/reflective-sphere.gltf';
 
-const skysphereUsingMap =
-    (scene, url) => {
-      const material = scene.skysphere.material;
-      const color = material.color.getHexString();
-      return textureMatchesMeta(material.map, {url: url}) && color === 'ffffff';
-    }
+const backgroundHasMap = (scene, url) =>
+    textureMatchesMeta(scene.background.texture, {type: 'CubeMap', url: url});
 
-const skysphereUsingColor =
-    (scene, hex) => {
-      const {color, map} = scene.skysphere.material;
-      // Invert gamma correct to match passed in hex
-      const gammaCorrectedColor = color.clone().convertLinearToGamma(2.2);
-
-      return map == null && gammaCorrectedColor.getHexString() === hex;
-    }
+const backgroundHasColor = (scene, hex) => {
+  if (!scene.background || !scene.background.isColor) {
+    return false;  
+  }
+  // Invert gamma correct to match passed in hex
+  const gammaCorrectedColor = scene.background.clone().convertLinearToGamma(2.2);
+  return gammaCorrectedColor.getHexString() === hex;
+}
 
 /**
  * Takes a scene and a meta object and returns a
@@ -106,17 +102,17 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
   teardown(() => element.remove());
 
   test(
-      'has default skysphere if no background-image or background-color',
+      'has default background if no background-image or background-color',
       () => {
-        expect(skysphereUsingColor(scene, 'ffffff')).to.be.equal(true);
+        expect(backgroundHasColor(scene, 'ffffff')).to.be.equal(true);
       });
 
   test(
-      'has default skysphere if no background-image or background-color when in DOM',
+      'has default background if no background-image or background-color when in DOM',
       async () => {
         document.body.appendChild(element);
         await timePasses();
-        expect(skysphereUsingColor(scene, 'ffffff')).to.be.equal(true);
+        expect(backgroundHasColor(scene, 'ffffff')).to.be.equal(true);
       });
 
   suite('with a background-image property', () => {
@@ -128,8 +124,8 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
         await onLoad;
       });
 
-      test('displays skysphere with the correct map', async function() {
-        expect(skysphereUsingMap(scene, element.backgroundImage)).to.be.ok;
+      test('displays background with the correct map', async function() {
+        expect(backgroundHasMap(scene, element.backgroundImage)).to.be.ok;
       });
 
       test('applies the image as an environment map', async function() {
@@ -149,8 +145,8 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
         await onLoad;
       });
 
-      test('displays skysphere with the correct color', async function() {
-        expect(skysphereUsingColor(scene, 'ff0077')).to.be.ok;
+      test('displays background with the correct color', async function() {
+        expect(backgroundHasColor(scene, 'ff0077')).to.be.ok;
       });
 
       test('applies a generated environment map on model', async function() {
@@ -158,11 +154,11 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       });
 
       test(
-          'displays skysphere with correct color after attaching to DOM',
+          'displays background with correct color after attaching to DOM',
           async function() {
             document.body.appendChild(element);
             await timePasses();
-            expect(skysphereUsingColor(scene, 'ff0077')).to.be.ok;
+            expect(backgroundHasColor(scene, 'ff0077')).to.be.ok;
           });
     });
   });
@@ -176,8 +172,8 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       await onLoad;
     });
 
-    test('displays skysphere with background-image', async function() {
-      expect(skysphereUsingMap(scene, element.backgroundImage)).to.be.ok;
+    test('displays background with background-image', async function() {
+      expect(backgroundHasMap(scene, element.backgroundImage)).to.be.ok;
     });
 
     test('applies background-image envmap on model', async function() {
@@ -191,8 +187,8 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
         await envmapChanged;
       });
 
-      test('displays skysphere with background-color', async function() {
-        expect(skysphereUsingColor(scene, 'ff0077')).to.be.ok;
+      test('displays background with background-color', async function() {
+        expect(backgroundHasColor(scene, 'ff0077')).to.be.ok;
       });
 
       test('reapplies generated envmap on model', async function() {

@@ -19,7 +19,7 @@ import {$needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-vie
 const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 const GAMMA_TO_LINEAR = 2.2;
 
-const $currentCubemap = Symbol('currentCubemap');
+const $currentEnvMap = Symbol('currentEnvMap');
 const $setEnvironmentImage = Symbol('setEnvironmentImage');
 const $setEnvironmentColor = Symbol('setEnvironmentColor');
 const $hasBackgroundImage = Symbol('hasBackgroundImage');
@@ -75,8 +75,8 @@ export const EnvironmentMixin = (ModelViewerElement) => {
     [$onModelLoad](e) {
       super[$onModelLoad](e);
 
-      if (this[$currentCubemap]) {
-        this[$scene].model.applyEnvironmentMap(this[$currentCubemap]);
+      if (this[$currentEnvMap]) {
+        this[$scene].model.applyEnvironmentMap(this[$currentEnvMap]);
         this[$needsRender]();
       }
     }
@@ -106,9 +106,9 @@ export const EnvironmentMixin = (ModelViewerElement) => {
 
       const { skybox, envmap } = textures;
 
-      this[$scene].background = envmap;
-      this[$currentCubemap] = cubemap;
-      this[$scene].model.applyEnvironmentMap(cubemap);
+      this[$scene].background = skybox;
+      this[$currentEnvMap] = envmap;
+      this[$scene].model.applyEnvironmentMap(envmap);
 
       this[$needsRender]();
     }
@@ -125,9 +125,9 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       this[$scene].background.convertGammaToLinear(GAMMA_TO_LINEAR);
 
       // TODO can cache this per renderer and color
-      const cubemap = textureUtils.generateDefaultEnvMap();
-      this[$currentCubemap] = cubemap;
-      this[$scene].model.applyEnvironmentMap(this[$currentCubemap]);
+      const envmap = textureUtils.generateDefaultEnvMap();
+      this[$currentEnvMap] = envmap;
+      this[$scene].model.applyEnvironmentMap(this[$currentEnvMap]);
 
       this[$needsRender]();
     }
@@ -137,9 +137,9 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       if (background && background.dispose) {
         background.dispose();
       }
-      if (this[$currentCubemap]) {
-        this[$currentCubemap].dispose();
-        this[$currentCubemap] = null;
+      if (this[$currentEnvMap]) {
+        this[$currentEnvMap].dispose();
+        this[$currentEnvMap] = null;
       }
     }
   }
