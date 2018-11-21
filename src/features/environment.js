@@ -72,12 +72,6 @@ export const EnvironmentMixin = (ModelViewerElement) => {
       }
     }
 
-    [$tick](time, delta) {
-      super[$tick](time, delta);
-      const camera = this[$scene].getCamera();
-      this[$scene].skysphere.position.copy(camera.position);
-    }
-
     [$onModelLoad](e) {
       super[$onModelLoad](e);
 
@@ -112,9 +106,8 @@ export const EnvironmentMixin = (ModelViewerElement) => {
 
       const { cubemap, equirect } = textures;
 
-      this[$scene].skysphere.material.color = new Color(0xffffff);
-      this[$scene].skysphere.material.map = equirect;
-      this[$scene].skysphere.material.needsUpdate = true;
+      console.log('setting bg', cubemap);
+      this[$scene].background = cubemap;
       this[$currentCubemap] = cubemap;
       this[$scene].model.applyEnvironmentMap(cubemap);
 
@@ -129,11 +122,8 @@ export const EnvironmentMixin = (ModelViewerElement) => {
 
       this[$deallocateTextures]();
 
-      this[$scene].skysphere.material.color = new Color(color);
-      this[$scene].skysphere.material.color.convertGammaToLinear(
-          GAMMA_TO_LINEAR);
-      this[$scene].skysphere.material.map = null;
-      this[$scene].skysphere.material.needsUpdate = true;
+      this[$scene].background = new Color(color);
+      this[$scene].background.convertGammaToLinear(GAMMA_TO_LINEAR);
 
       // TODO can cache this per renderer and color
       const cubemap = textureUtils.generateDefaultEnvMap();
@@ -144,9 +134,9 @@ export const EnvironmentMixin = (ModelViewerElement) => {
     }
 
     [$deallocateTextures]() {
-      if (this[$scene].skysphere.material.map) {
-        this[$scene].skysphere.material.map.dispose();
-        this[$scene].skysphere.material.map = null;
+      const background = this[$scene].background;
+      if (background && background.dispose) {
+        background.dispose();
       }
       if (this[$currentCubemap]) {
         this[$currentCubemap].dispose();
