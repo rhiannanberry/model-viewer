@@ -129,7 +129,7 @@ export default class TextureManager extends EventDispatcher {
   }
 
   /**
-   * Returns a { equirect, cubemap } object with the textures
+   * Returns a { skybox, envmap } object with the textures
    * accordingly, or null if cannot generate a texture from
    * the URL.
    *
@@ -137,7 +137,7 @@ export default class TextureManager extends EventDispatcher {
    * @param {string} url
    * @return {Promise<Object|null>}
    */
-  async toCubemapAndEquirect(url) {
+  async generateEnvironmentTextures(url) {
     let equirect, cubemap;
     try {
       equirect = await this.load(url);

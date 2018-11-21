@@ -86,7 +86,7 @@ export const EnvironmentMixin = (ModelViewerElement) => {
      */
     async [$setEnvironmentImage](url) {
       const textureUtils = this[$renderer].textureUtils;
-      const textures = await textureUtils.toCubemapAndEquirect(url);
+      const textures = await textureUtils.generateEnvironmentTextures(url);
 
       // If the background image has changed
       // while fetching textures, abort and defer to that
@@ -104,10 +104,9 @@ export const EnvironmentMixin = (ModelViewerElement) => {
         return;
       }
 
-      const { cubemap, equirect } = textures;
+      const { skybox, envmap } = textures;
 
-      console.log('setting bg', cubemap);
-      this[$scene].background = cubemap;
+      this[$scene].background = envmap;
       this[$currentCubemap] = cubemap;
       this[$scene].model.applyEnvironmentMap(cubemap);
 
